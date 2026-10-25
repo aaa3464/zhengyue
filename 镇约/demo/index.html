@@ -1,0 +1,1191 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14110e">
+<title>镇约 · 稽查员</title>
+<style>
+  :root{
+    --ink:#e8ddc8; --dim:#9b9078; --faint:#6e6555;
+    --bg:#12100d; --card:rgba(255,248,235,.035);
+    --line:rgba(198,168,120,.16); --line2:rgba(198,168,120,.32);
+    --red:#a83c2a; --red2:#d2603f; --jade:#7f9a86; --gold:#c9a878;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:"Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;font-size:15px;line-height:1.55;overscroll-behavior:none}
+  body{min-height:100vh;
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(94,66,40,.30), transparent 60%),
+      radial-gradient(80% 50% at 0% 100%, rgba(30,44,38,.28), transparent 70%),
+      var(--bg)}
+  #app{max-width:520px;margin:0 auto;padding:14px 14px 28px;min-height:100vh;display:flex;flex-direction:column;gap:10px}
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .brand{font-size:19px;letter-spacing:.32em;color:#f2e7d2}
+  .brand small{display:block;font-size:10px;color:var(--faint);margin-top:2px;letter-spacing:.28em}
+  .meter{display:flex;gap:12px;align-items:flex-end}
+  .meter .m{text-align:center}
+  .meter .m span{display:block;font-size:9.5px;color:var(--faint);letter-spacing:.16em;margin-bottom:2px}
+  .pips{display:flex;gap:3px}
+  .pips i{width:9px;height:9px;border:1px solid rgba(198,168,120,.4);border-radius:50%}
+  .pips.ap i.on{background:#c9a878;border-color:#c9a878}
+  .pips.sc i.on{background:#b8432c;border-color:#b8432c;box-shadow:0 0 6px rgba(184,67,44,.8)}
+  .pips.sc i.on.hi{animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{box-shadow:0 0 12px rgba(239,122,82,.95)}}
+  .sec-title{font-size:11.5px;letter-spacing:.3em;color:#7d7058;margin:7px 0 -2px;display:flex;justify-content:space-between;align-items:center}
+  .sec-title em{font-style:normal;color:var(--faint);letter-spacing:.1em;font-size:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:10px 11px}
+  .banner{border:1px solid var(--gold);background:linear-gradient(180deg,rgba(201,168,120,.14),rgba(201,168,120,.04));
+    border-radius:3px;padding:10px 12px;cursor:pointer;animation:pop .45s ease}
+  .banner.bad{border-color:var(--red);background:linear-gradient(180deg,rgba(168,60,42,.18),rgba(168,60,42,.04))}
+  .banner.good{border-color:var(--jade);background:linear-gradient(180deg,rgba(127,154,134,.16),rgba(127,154,134,.04))}
+  .banner h3{margin:0 0 3px;font-size:15.5px;color:#f6e7c8;letter-spacing:.1em;font-weight:400}
+  .banner.bad h3{color:#efb69f}
+  .banner p{margin:0;font-size:12.5px;color:#c8b99d;line-height:1.55}
+  .banner .who{font-size:10px;color:var(--faint);letter-spacing:.2em;margin-bottom:2px}
+  @keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.99)}to{opacity:1;transform:none}}
+  .ghost{position:relative;transition:.15s;cursor:pointer;margin-bottom:7px}
+  .ghost.sel{border-color:var(--red);box-shadow:0 0 0 1px var(--red) inset}
+  .ghost.dim{opacity:.4;cursor:default}
+  .ghost.dazed{border-color:rgba(127,154,134,.45)}
+  .ghost .top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .gname{font-size:16px;color:#f4e8d0}
+  .gname.unk{color:#9b8f78;letter-spacing:.06em}
+  .chip{font-size:10px;padding:1px 6px;border:1px solid rgba(198,168,120,.34);border-radius:2px;color:#c0b195;letter-spacing:.08em;white-space:nowrap}
+  .chip.rank{border-color:rgba(210,96,63,.55);color:#e09373}
+  .chip.dead{background:rgba(168,60,42,.18);border-color:var(--red);color:var(--red2)}
+  .chip.done{background:rgba(127,154,134,.15);border-color:rgba(127,154,134,.5);color:var(--jade)}
+  .power{margin-left:auto;font-size:11px;color:var(--faint);letter-spacing:.06em}
+  .power b{color:#e8b894;font-weight:400;font-size:14px;font-variant-numeric:tabular-nums}
+  .intent{font-size:11.5px;color:#c9b48f;margin:5px 0 2px;letter-spacing:.02em}
+  .intent.warn{color:#e09373}
+  .intent .lbl{color:#7d7058;letter-spacing:.14em;font-size:10px;margin-right:4px}
+  .law{font-size:13px;color:#cfc3ac;margin:4px 0 2px;letter-spacing:.02em}
+  .law em{color:#e6b98f;font-style:normal}
+  .rumor{font-size:11.5px;color:#7d7058;font-style:italic;margin:2px 0 0}
+  .intel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:7px}
+  .cell{border:1px solid rgba(198,168,120,.13);border-radius:2px;padding:3px 2px;text-align:center;background:rgba(0,0,0,.12);overflow:hidden}
+  .cell b{display:block;font-size:11.5px;color:#5f5748;font-weight:400;letter-spacing:.06em}
+  .cell span{font-size:9px;color:#4a4438;letter-spacing:.1em}
+  .cell.k b{color:#ddd0b6}
+  .cell.k span{color:#7d7058}
+  .cell.q{border-style:dashed;border-color:rgba(198,168,120,.10)}
+  .cell.pick{border-color:rgba(210,96,63,.6);background:rgba(168,60,42,.12);cursor:pointer}
+  .bar{height:3px;background:rgba(198,168,120,.12);border-radius:2px;margin-top:6px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#8c2f20,#d2603f)}
+  .people{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .person{font-size:12.5px;padding:7px 8px;border:1px solid var(--line);border-radius:2px;background:rgba(255,248,235,.02);cursor:pointer;transition:.12s;display:flex;flex-direction:column;gap:3px;position:relative}
+  .person.sel{border-color:var(--red);background:rgba(168,60,42,.12)}
+  .person.prot{border-color:rgba(127,154,134,.6)}
+  .person.key{border-color:#b89a6a;background:linear-gradient(90deg,rgba(201,168,120,.16),rgba(201,168,120,.04));box-shadow:inset 3px 0 0 #c9a878}
+  .person.dead{opacity:.26;text-decoration:line-through;cursor:default}
+  .person .pn{display:flex;align-items:center;gap:4px}
+  .person .tags{display:flex;gap:3px;flex-wrap:wrap}
+  .tag{font-size:9.5px;color:var(--faint);border:1px solid rgba(198,168,120,.14);padding:0 4px;border-radius:2px}
+  .tag.match{color:#d98a6d;border-color:rgba(210,96,63,.45)}
+  .fear{display:flex;gap:2px;margin-top:3px}
+  .fear i{width:12px;height:5px;background:rgba(198,168,120,.42);border-radius:1px}
+  .fear i.on{background:#c8563a}
+  .fear i.hi{background:#ef7a52;box-shadow:0 0 5px rgba(239,122,82,.75)}
+  .hand{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+  .hcard{flex:0 0 104px;min-width:0;border:1px solid var(--line2);border-radius:3px;padding:6px;background:linear-gradient(180deg,rgba(255,248,235,.05),rgba(255,248,235,.015));cursor:pointer;font-size:10.5px;line-height:1.35;color:#ddd0b6}
+  .hcard b{display:block;font-size:12px;color:#f0e3c9;font-weight:400;letter-spacing:.05em;margin-bottom:2px}
+  .hcard .cls{font-size:8.5px;color:var(--faint);letter-spacing:.2em}
+  .hcard.sel{border-color:var(--red);box-shadow:0 0 0 1px var(--red) inset}
+  .hcard.empty{opacity:.35;cursor:default;text-align:center;padding:14px 6px}
+  #actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .btn{padding:9px 3px;text-align:center;font-family:inherit;font-size:12.5px;color:#e7d9bf;background:linear-gradient(180deg,rgba(255,248,235,.06),rgba(255,248,235,.02));border:1px solid var(--line2);border-radius:2px;cursor:pointer;letter-spacing:.06em;transition:.12s;display:flex;flex-direction:column;gap:1px}
+  .btn small{font-size:9px;color:var(--faint);letter-spacing:.06em}
+  .btn:disabled{opacity:.32;cursor:default}
+  .btn:active:not(:disabled){transform:translateY(1px)}
+  .btn.on{border-color:var(--red);color:#f0cbb8;background:rgba(168,60,42,.16)}
+  .btn.on small{color:#b98b74}
+  .btn.wide{grid-column:1/-1;padding:9px;background:transparent;color:var(--dim);border-style:dashed;font-size:12.5px}
+  #hint{font-size:11px;color:var(--faint);min-height:15px;letter-spacing:.04em;text-align:center}
+  #log{font-size:12px;color:#b3a68f;max-height:132px;overflow-y:auto;display:flex;flex-direction:column-reverse;gap:2px;line-height:1.5}
+  #log p{margin:0;padding-left:10px;position:relative}
+  #log p::before{content:"·";position:absolute;left:0;color:var(--faint)}
+  #log p.hit{color:#d98a6d}
+  #log p.good{color:var(--jade)}
+  #log p.big{color:#f0cba0;letter-spacing:.06em}
+  #log p.night{color:#e0c9a6;margin-top:4px;letter-spacing:.1em}
+  .over{text-align:center;padding:18px 12px}
+  .over h2{font-size:25px;letter-spacing:.4em;margin:0 0 6px;color:#f2e2c6;font-weight:400}
+  .over .sub{color:var(--dim);font-size:12px;letter-spacing:.14em}
+  .over p{font-size:13px;color:#c2b49a;margin:12px 0 16px;line-height:1.8}
+  .over p.left{text-align:left}
+  .over .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 14px}
+  .over .stats div{border:1px solid var(--line);padding:6px 2px;font-size:11px;color:var(--dim)}
+  .over .stats b{display:block;font-size:16px;color:#eadcc2;font-weight:400}
+  .again{font-family:inherit;padding:11px 26px;background:rgba(201,168,120,.1);color:#f0e3c9;border:1px solid var(--line2);border-radius:2px;letter-spacing:.24em;font-size:13.5px;cursor:pointer}
+  .pick{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .pick .hcard{flex:none;width:100%}
+  .t0{color:var(--faint);font-size:11px;letter-spacing:.14em;text-align:center}
+/* ---- v0.5 可读性与可点性 ---- */
+:root{--dim:#b3a78f;--faint:#8d8272}
+.pips i{width:9px;height:9px;border-radius:2px;border-color:rgba(201,168,120,.55)}
+.pips.ap i.on{background:#e0b24f;box-shadow:0 0 4px rgba(224,178,79,.55)}
+.pips.sc i.on{background:#b8462f}
+.meter .m span{font-size:10.5px;color:#b3a78f}
+.meter .m span b{color:#e6dcc6;font-size:11.5px;margin-left:2px}
+.btn{background:#241f1a;border:1px solid #4a4036}
+.btn small{color:#c9a878;font-size:10px}
+.btn.off{opacity:.26;filter:grayscale(1);border-style:dashed;border-color:#3a332b}
+.btn.off small{color:#6e655a}
+.btn.on{border-color:#e0b24f;background:#33281b}
+.btn.wide.primary{background:#6f5024;border:1px solid #c9a878;color:#f6ecd6;font-weight:600}
+.intent{display:flex;align-items:baseline;gap:6px;border-left:3px solid #c9a878;background:rgba(201,168,120,.08);padding:6px 8px;margin:6px 0}
+.intent.warn{border-left-color:#d4583c;background:rgba(212,88,60,.09)}
+.intent .lbl{font-size:10.5px;color:#c9a878;letter-spacing:.12em}
+.intent .itxt{font-size:13px;color:#e8ddc4}
+.unsure{font-size:10px;color:#e08a5a;border:1px solid rgba(224,138,90,.55);padding:0 4px;border-radius:3px;margin-left:auto}
+.cell.k{border:1px solid rgba(201,168,120,.55);background:rgba(201,168,120,.12)}
+.cell.pick{border-color:#e0b24f;background:rgba(224,178,79,.16);box-shadow:0 0 0 1px #e0b24f inset}
+.intelhint{font-size:10.5px;color:#b3a78f;margin:5px 0 4px}
+.bonebar{display:flex;align-items:center;gap:8px}
+.bonebar .bar{flex:1}
+.barlbl{font-size:10.5px;color:#b3a78f;white-space:nowrap}
+.power small{font-size:9.5px;color:#9b9078;margin-left:1px}
+.tag{border:1px solid rgba(201,168,120,.3);color:#c0b195;padding:1px 4px}
+.tag.t-soul{border-color:rgba(120,170,190,.55);color:#a9cfdd;background:rgba(120,170,190,.1)}
+.tag.t-obj{border-color:rgba(200,140,110,.55);color:#e3b79c;background:rgba(200,140,110,.1)}
+.tag.t-body{border-color:rgba(170,150,90,.55);color:#dcc98a;background:rgba(170,150,90,.1)}
+.hcard.back{background:repeating-linear-gradient(45deg,#221d19,#221d19 6px,#2a2521 6px,#2a2521 12px);border:1px dashed #3b342c;min-height:66px}
+#hint{min-height:0;margin:2px 0}
+#hint:not(:empty){border-left:3px solid #e0b24f;background:rgba(224,178,79,.1);padding:6px 8px;margin:6px 0;font-size:11.5px}
+#actions{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(20,17,16,0),#141110 16%);padding:10px 0 6px;z-index:5}
+.sec-title{color:#cbb891}
+#log p{font-size:11.5px;color:#a89b83}
+/* ---- v0.6 三按钮 / 引导条 / 飘字 / 抖动 ---- */
+.mute{float:right;background:transparent;border:1px solid #3a332b;border-radius:4px;color:#b3a78f;font-size:13px;padding:2px 6px;margin-top:-2px}
+#guide{font-size:11.5px;line-height:1.5;color:#cbb891;background:rgba(201,168,120,.1);border-left:3px solid #c9a878;padding:6px 8px;margin-bottom:8px;border-radius:0 3px 3px 0}
+#btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#btns .btn{font-size:16px;letter-spacing:.22em;min-height:52px}
+#btns .btn small{display:block;font-size:9.5px;letter-spacing:0;margin-top:2px;color:#9c8f77}
+#btns .btn.wide{grid-column:1 / -1;margin-top:2px;min-height:44px;font-size:14px;letter-spacing:.1em}
+.float{position:fixed;left:50%;top:44%;transform:translate(-50%,0);font-size:26px;font-weight:700;pointer-events:none;z-index:99;animation:fly 1s ease-out forwards;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.float.good{color:#e9c46a}
+.float.bad{color:#e0765a}
+.float.big{color:#f2dfae;font-size:32px;letter-spacing:.1em}
+@keyframes fly{0%{opacity:0;transform:translate(-50%,8px) scale(.9)}18%{opacity:1;transform:translate(-50%,-4px) scale(1.06)}100%{opacity:0;transform:translate(-50%,-64px) scale(1)}}
+.shaking{animation:shk .32s}
+@keyframes shk{0%,100%{transform:translate(0)}20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)}}
+.person.sel{outline:2px solid #e0b24f;outline-offset:1px}
+/* ---- v0.7 夜记吸顶条 ---- */
+.lastlog{position:sticky;top:0;z-index:7;display:flex;align-items:baseline;gap:7px;background:#181412;border:1px solid #2e2721;border-left:3px solid #c9a878;border-radius:0 3px 3px 0;padding:7px 8px;margin:8px 0 10px;cursor:pointer;box-shadow:0 6px 14px -8px #000}
+.lastlog .ll-lbl{font-size:10px;letter-spacing:.18em;color:#8d8272;flex:none}
+.lastlog .ll-txt{font-size:12.5px;color:#e2d7bf;line-height:1.45;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lastlog .ll-more{font-size:10px;color:#9b8f78;flex:none;border:1px solid #3a332b;border-radius:3px;padding:1px 5px}
+.lastlog.hit{border-left-color:#c8503a}
+.lastlog.hit .ll-txt{color:#f0c3b8}
+.lastlog.good{border-left-color:#d9b26a}
+.lastlog.good .ll-txt{color:#f2e2bb}
+.lastlog.big{border-left-color:#e0b24f;background:#211b13}
+.lastlog.big .ll-txt{font-size:13.5px;color:#f7ecd2;font-weight:600}
+#log{background:#171310;border:1px solid #2b2520;border-radius:3px;padding:6px 8px;margin:-4px 0 10px;max-height:220px;overflow:auto}
+#log p{margin:3px 0}
+.pouch{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;background:#17120f;border:1px solid #2c2520;border-radius:3px;padding:6px 9px;margin:-2px 0 12px;font-size:11px;color:#9b9078}
+.pouch b{color:#e2d3b4;font-weight:600}
+.pouch em{margin-left:auto;font-style:normal;font-size:9.5px;color:#6e6555}
+.ghost.brute{border-color:#8d3a2a;background:linear-gradient(180deg,#241714,#1a1210)}
+.ghost.brute .gname{color:#f0b3a4}
+.logwrap{position:sticky;top:0;z-index:7;background:#141110;padding-bottom:2px}
+.logwrap #log{position:relative;z-index:7;margin:2px 0 8px}
+#btns{grid-template-columns:repeat(auto-fit,minmax(52px,1fr));gap:5px}
+#btns .btn{min-width:0;font-size:12.5px;padding:7px 1px;line-height:1.15;letter-spacing:.06em}
+#btns .btn small{display:block;font-size:8.5px;opacity:.72;margin-top:2px}
+#btns .btn.wide{flex:1 1 100%}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+const R = n => Math.floor(Math.random() * n);
+const pick = a => a[R(a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = R(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+const NIGHTS = 7;
+const BONES = ["law", "rank", "tag", "phys"];
+const BONE_CN = { law: "律文", rank: "律值", tag: "触媒", phys: "形体" };
+
+const GHOST_POOL = [
+  { name: "井中婆", type: "rule", law: "喝过村口井水的人，七日内溺死。", tag: "井水", rank: 2, p: 100, phys: false,
+    intents: ["寻水", "守井"], rumor: "井台的石板最近总是湿的。" },
+  { name: "无面送葬人", type: "rule", law: "送葬时回头的人，随棺而去。", tag: "送葬", rank: 2, p: 70, phys: true,
+    intents: ["等人回头", "收棺"], rumor: "抬棺的人说，棺材比来的时候沉。" },
+  { name: "溺婴·小满", type: "rule", law: "有人为亡者哭，哭声所及必有一人溺死。", tag: "哭声", rank: 1, p: 50, phys: false,
+    intents: ["听哭", "寻水"], rumor: "夜里有人听见小孩在河边数数。" },
+  { name: "双生童", type: "rule", law: "夜里数窗户，数到第七扇的人，与它同眠。", tag: "数窗", rank: 1, p: 60, phys: true,
+    intents: ["数窗", "换地方"], rumor: "西头两户人家的窗户都碎了第七扇。" },
+  { name: "纸扎匠", type: "rule", law: "烧给死人的纸活，收下的那个人替它走一程。", tag: "纸钱", rank: 3, p: 80, phys: true,
+    intents: ["收纸", "换地方"], rumor: "纸扎铺的灯笼自己亮过一回。" },
+  { name: "回头客", type: "rule", law: "在岔路口回头看三次的人，第三眼看见的就是它。", tag: "路口", rank: 2, p: 90, phys: true,
+    intents: ["等人回头", "换地方"], rumor: "岔路口的三棵树上都挂着布条。" },
+  { name: "饿死鬼", type: "value", law: "", tag: "饭", rank: 3, p: 100, phys: true,
+    intents: ["吃人"], rumor: "镇东的狗这两天都不敢叫。" },
+  { name: "食鬼", type: "value", law: "", tag: "血", rank: 3, p: 100, phys: true,
+    intents: ["吃人"], rumor: "坟地边上的野草被压倒了一片。" },
+  { name: "绣娘", type: "rule", law: "接过她绣的东西的人，三日内手指先烂。", tag: "针线", rank: 2, p: 80, phys: true,
+    intents: ["找人接活", "收线"], rumor: "镇上的绣活最近没人敢接了。" },
+  { name: "守钟人", type: "rule", law: "在钟楼听见自己名字的人，别再应第二声。", tag: "钟声", rank: 3, p: 60, phys: false,
+    intents: ["撞钟", "寻声"], rumor: "钟楼昨夜响了一下，没人上去过。" },
+  { name: "卖水客", type: "rule", law: "喝过它担里水、却欠着一文钱的人，担子自己找上门。", tag: "铜钱", rank: 1, p: 70, phys: true,
+    intents: ["叫卖", "跟人回家"], rumor: "卖水的挑子搁在巷口，一直没人挑走。" },
+  { name: "磨坊主", type: "rule", law: "磨盘转时在磨坊许过愿的人，愿都还给他。", tag: "石磨", rank: 2, p: 50, phys: false,
+    intents: ["推磨", "换地方"], rumor: "磨坊的磨盘半夜自己在转。" },
+  { name: "槐树下", type: "rule", law: "在老槐树下歇过脚的人，梦里会回到那棵树底下。", tag: "树荫", rank: 1, p: 90, phys: false,
+    intents: ["等人歇脚", "收梦"], rumor: "老槐树底下又多了几双鞋。" }
+];
+const TAGS = ["井水", "送葬", "哭声", "数窗", "纸钱", "路口", "饭", "血", "针线", "钟声", "铜钱", "石磨", "树荫"];
+const TAG_CLS = { 井水: "t-soul", 哭声: "t-soul", 纸钱: "t-soul", 针线: "t-soul", 钟声: "t-soul", 树荫: "t-soul", 送葬: "t-obj", 数窗: "t-obj", 路口: "t-obj", 铜钱: "t-obj", 石磨: "t-obj", 饭: "t-body", 血: "t-body" };
+const VNAMES = ["周先生", "阿蘅", "陈先生", "李铁匠", "王婶", "赵郎中", "钱木匠", "孙寡妇",
+  "吴账房", "郑屠户", "冯篾匠", "何船工", "许货郎", "曹吹鼓", "姚更夫", "蒋瞎子"];
+const TRAITS = ["会打铁", "知道井的旧事", "怕水", "识字", "会看相", "跑得快", "不认字", "耳朵灵",
+  "倔", "会划船", "懂丧仪", "记性好"];
+const KEYS = [
+  { key: "周先生", role: "药铺掌柜", ask: "先给他一件葬具作保", good: { t: "药方", d: "复活一名今夜死去的人" }, bad: { t: "闭门", d: "所有葬具本夜失灵" } },
+  { key: "阿蘅", role: "井台哑女", ask: "立誓不让她入土", good: { t: "开口", d: "揭示一只鬼的全部触媒与律值" }, bad: { t: "入井", d: "直接死一个人，它吃饱了" } },
+  { key: "陈先生", role: "教书匠", ask: "替他补两页镇志", good: { t: "改志", d: "揭示一只鬼的律文与形体" }, bad: { t: "焚志", d: "抹掉你已知的一条情报" } }
+];
+const INTENT_CN = {
+  "寻水": "今夜去找喝过井水的人", "守井": "守在井边，谁靠近就拖下去",
+  "等人回头": "等在送葬的路上，有人回头就带走", "收棺": "去开那口还没下葬的棺",
+  "听哭": "循着哭声，谁哭得最响就找谁", "数窗": "去数窗户，数到第七扇的人",
+  "换地方": "挪去镇子另一头，换个地方等", "收纸": "跟着烧纸的人回家",
+  "吃人": "饿极了，今夜直接吃一个人",
+  "找人接活": "挨家挨户问，谁家要绣活", "收线": "循着那根红线，去找线头",
+  "撞钟": "上钟楼，把丧钟撞响一声", "寻声": "听见钟声的人，它一个一个找过去",
+  "叫卖": "挑着水担走街，谁欠它一文钱", "跟人回家": "跟着买过水的人回家",
+  "推磨": "磨坊的磨盘，谁路过就磨谁", "等人歇脚": "等在老槐树下，谁坐下就算谁",
+  "收梦": "去收那些做过的梦"
+};
+const CARD_POOL = [
+  { cls: "查", name: "验尸", d: "立即拆掉一只鬼的一根律骨",
+    act: c => c.onGhost(g => !g.sealed && g.bones > 0, g => { g.bones--; g.power -= 15; log(`验尸：应验降到 ${g.power}。`, "big"); }) },
+  { cls: "查", name: "翻档", d: "揭示一只鬼的全部四格情报",
+    act: c => c.onGhost(g => !g.sealed, g => { BONES.forEach(b => g.known[b] = 1); log(`翻档：${g.name} 的四格全开了。`, "good"); }) },
+  { cls: "查", name: "诈话", d: "本夜交谈次数 +2",
+    act: c => { c.s.talk += 2; log("诈话：今夜还能再问两个人。", "good"); } },
+  { cls: "镇", name: "引魂灯", d: "本夜死亡人数 -1",
+    act: c => { c.s.ward = 1; log("引魂灯：今夜少死一个人。", "good"); } },
+  { cls: "镇", name: "护身符", d: "挡下本夜的第一次死亡",
+    act: c => { c.s.charm = 1; log("护身符：替你挡一次。", "good"); } },
+  { cls: "镇", name: "别回头", d: "作废一只鬼今夜的图谋",
+    act: c => c.onGhost(g => !g.sealed, g => { g.cancel = 1; log(`别回头：${g.name} 今夜什么也做不成。`, "good"); }) },
+  { cls: "驱", name: "合契符", d: "本夜撞律不要求律值相同",
+    act: c => { c.s.pact = 1; log("合契符：今夜的律可以对撞了。", "good"); } },
+  { cls: "驱", name: "封匣", d: "直接收走一只已拆三骨的鬼",
+    act: c => c.onGhost(g => !g.sealed && g.bones <= 1, g => seal(g)) },
+  { cls: "驱", name: "驾驭契", d: "让一只鬼今夜与明夜听你差遣（+1 伤痕）",
+    act: c => c.onGhost(g => !g.sealed, g => { g.ctrl = 2; c.s.scars++; c.s.drives++; log(`驾驭：${g.name} 暂听你的，你多了一道伤。`, "hit"); }) }
+];
+const NIGHT_EVENTS = [
+  { t: "井台唱戏", d: "有人在井台唱戏，全镇的恐惧都涨了一截。", f: s => s.vs.filter(v => v.alive).slice(0, 3).forEach(v => addFear(v, 1)) },
+  { t: "祠堂灯灭", d: "祠堂的灯自己灭了，守夜的人不敢出门。", f: s => { s.ward = 1; } },
+  { t: "狗不叫了", d: "镇上的狗一夜没叫。你听见有人在数窗户。", f: s => { s.fearAll = 1; } },
+  { t: "起雾", d: "雾从河上漫过来，今夜你少走一步。", f: s => { s.ap = Math.max(1, s.ap - 1); } },
+  { t: "提前出殡", d: "有人家提前出殡，送葬的队伍里少了一个人。", f: s => { const v = s.vs.filter(v => v.alive && v.tags.includes("送葬"))[0]; if (v) addFear(v, 2); } },
+  { t: "镇志被撕", d: "镇志被撕掉两页，你丢了一条线索。", f: s => { const g = s.gs.find(g => !g.sealed && g.bones < 4); if (g) { g.bones++; g.power += 15; } } },
+  { t: "柴房有动静", d: "柴房里有人躲了一夜，出来时老了很多。", f: s => { const v = s.vs.filter(v => v.alive)[0]; if (v) addFear(v, 2); } }
+];
+const FLIP_GOOD = [
+  { t: "守夜人", d: "他提着灯站在门口，今夜这一屋的人都安全。" },
+  { t: "殉道", d: "他替你挡下了本该落在你身上的东西。" },
+  { t: "揭发", d: "他把你没敢问的话问了出来。" },
+  { t: "守口", d: "他什么也没说，把恐惧咽了回去。" }
+];
+const FLIP_BAD = [
+  { t: "告密", d: "他把你的名字说给了井里的东西听。" },
+  { t: "替死", d: "他推了身边一个人出去。" },
+  { t: "逃镇", d: "他连夜跑了，还带走了一个人。" },
+  { t: "疯癫", d: "他到处喊你的名字，全镇的恐惧都涨了。" }
+];
+
+let S = null;
+let UI = { mode: null, ghost: null, villager: null, banner: null, draw: null, hint: "", personSel: null, logOpen: false };
+
+function newState(identity) {
+  const pool = shuffle(GHOST_POOL.slice());
+  const rule = pool.filter(g => g.type === "rule");
+  const value = pool.filter(g => g.type === "value");
+  const chosen = [rule[0], rule[1], value[0]];
+  const gs = chosen.map((g, i) => ({
+    id: i, name: g.name, type: g.type, law: g.law, tag: g.tag, rank: g.rank,
+    p: g.p, phys: g.phys, intents: g.intents, rumor: g.rumor,
+    bones: 4, power: g.p, known: { law: 0, rank: 0, tag: 0, phys: 0 },
+    sealed: false, dazed: 0, fed: false, cancel: 0, ctrl: 0,
+    bonus: 0, intent: null, misread: false, showIntent: null, remember: 0, dazeTwin: undefined
+  }));
+  const ranks = shuffle([1, 1, 2, 3]);
+  gs[0].rank = ranks[0]; gs[1].rank = ranks[1]; gs[2].rank = 3;
+  gs.forEach((g, i) => {
+    if (g.type === "value") { g.known.law = 1; g.law = "它没有律——它只认吃。"; g.power = g.p + 25; }
+    g.frag = { law: 0, rank: 0, tag: 0, phys: 0 }; BONES.forEach(b => { g.frag[b] = g.known[b] ? 2 : 0; });
+    g.bones0 = g.type === "value" ? 3 : 4; g.bones = g.bones0;
+    g.discovered = i === 0; g.isBrute = false;
+  });
+  gs.push({
+    id: 3, name: "渡客", type: "brute", law: "它不认律，只认血。", tag: "无", rank: 0,
+    p: 120, phys: true, intents: ["吃人"], rumor: "镇上开始有人一夜之间就不见了。",
+    bones: 0, power: 120, known: { law: 1, rank: 1, tag: 1, phys: 1 },
+    sealed: false, dazed: 0, fed: false, cancel: 0, ctrl: 0,
+    bonus: 0, intent: null, misread: false, showIntent: null, remember: 0, dazeTwin: undefined,
+    isBrute: true, discovered: false, frag: { law: 2, rank: 2, tag: 2, phys: 2 }
+  });
+  const tagbag = shuffle(TAGS.concat(TAGS, TAGS));
+  const vs = [];
+  for (let i = 0; i < 14; i++) {
+    const nm = VNAMES[i];
+    const kf = KEYS.find(k => k.key === nm);
+    vs.push({
+      id: i, name: nm, alive: true, fear: R(2), tags: [tagbag[i * 2], tagbag[i * 2 + 1]],
+      key: !!kf, kf: kf || null, talked: 0, protected: false, trait: TRAITS[i % TRAITS.length],
+      flip: null
+    });
+  }
+  return {
+    identity, night: 1, ap: 0, scars: 0, talk: 2, turn: 0,
+    gs, vs, hand: [], deck: shuffle(CARD_POOL.concat(CARD_POOL.slice(0, 3))),
+    occupied: [1, 0, 0, 0], items: { 饵: 0, 灯: 0, 契: 1 }, ammo: identity.includes("巡夜警") ? 3 : 0, talisman: 0, logs: [], ended: false, ending: null,
+    ward: 0, charm: 0, pact: 0, deadTonight: 0, sealedCount: 0, merged: false, tools: 3,
+    freed: 0, drives: 0, intel: 0, flips: 0, runs: 0, fearAll: 0
+  };
+}
+const aliveV = s => s.vs.filter(v => v.alive);
+const liveG = s => s.gs.filter(g => !g.sealed && !g.merged);
+function isAwake(s, g) { return s.occupied[g.id] === 1; }
+
+const FRAG_TXT = { law: "一句没头没尾的律", rank: "它的律值", tag: "它认的那件事", phys: "它的形体" };
+function maybeIdentify(g) {
+  if (g.identified || g.sealed) return;
+  const n = BONES.filter(b => g.known[b]).length;
+  const hit = g.type === "value" ? g.known.phys : (g.known.law || n >= 2);
+  if (!hit) return;
+  g.identified = true;
+  log(`你看清了——这是「${g.name}」。`, "night");
+}
+
+function addFrag(g, bone) {
+  if (g.known[bone]) return "known";
+  g.frag[bone] = Math.min(2, (g.frag[bone] || 0) + 1);
+  if (g.frag[bone] >= 2) {
+    g.known[bone] = 1; g.bones = Math.max(0, g.bones - 1); g.power = Math.max(10, g.power - 15); S.intel++;
+    if (bone === "law") log(`碎片拼上了：「${g.law}」`, "big");
+    else if (bone === "tag") log(`触媒对上了：${g.tag}`, "big");
+    else if (bone === "rank") log(`律值 ${g.rank}`, "big");
+    else log(`形体：${g.phys ? "有实体" : "没有实体"}`, "big");
+    maybeIdentify(g);
+    log(`「拆 · ${BONE_CN[bone]}」应验 ${g.power + 15} → ${g.power}`, "big");
+    if (g.bones === 0) log(`${g.name}的律被拆干净了——可以送走它。`, "good");
+    sfx("bone"); float("应验 −15", "good");
+    return "reveal";
+  }
+  sfx("tap");
+  return "half";
+}
+function gainItem() {
+  const k = pick(["饵", "灯", "契"]);
+  S.items[k]++;
+  const nm = { 饵: "香饵", 灯: "引路灯", 契: "合契符" }[k];
+  sfx("good2"); float(`拾得 ${nm}`, "good");
+  log(`你在那处摸到了${nm}。`, "good");
+}
+function discoverOne() {
+  const hid = S.gs.filter(g => !g.discovered && !g.sealed && !g.isBrute);
+  if (!hid.length) return null;
+  const g = pick(hid);
+  g.discovered = true;
+  const where = pick(["井台边的湿脚印", "祠堂后头的一行小字", "柴房梁上垂下来的头发", "河边多出来的一双鞋", "有人半夜敲了三下门"]);
+  log(`你撞见了一处响动：${where}。镇上不止一只东西。`, "night");
+  return g;
+}
+
+function log(text, cls) { S.logs.push({ t: text, c: cls || "" }); }
+function addFear(v, n) {
+  if (!v.alive) return;
+  v.fear = clamp(v.fear + n, 0, 5);
+  if (v.fear >= 5 && !v.flip) v.flip = "pending";
+}
+
+function startNight(s) {
+  s.fed = {}; s.ward = 0; s.charm = 0; s.pact = 0; s.deadTonight = 0; s.turn = 0;
+  s.ap = (s.identity === "先生" ? 5 : s.identity === "稽查员" ? 4 : 3) - (s.scars >= 3 ? 1 : 0);
+  s.talk = 2; s.talisman = s.identity.includes("先生") ? 2 : 0;
+  s.vs.forEach(v => { v.protected = false; });
+  s.gs.forEach(g => { g.cancel = 0; if (isAwake(s, g) && !g.sealed) rollIntent(s, g); });
+  if (s.night > 1 && Math.random() < 0.45) {
+    const ev = pick(NIGHT_EVENTS);
+    log(`夜事：${ev.t} —— ${ev.d}`, "night");
+    ev.f(s);
+  }
+  log(`第 ${s.night} 夜。`, "night");
+}
+
+function rollIntent(s, g) {
+  g.intent = pick(g.intents);
+  const known = BONES.filter(b => g.known[b]).length;
+  g.misread = known < 2 && Math.random() < 0.3;
+  const alt = g.intents.filter(i => i !== g.intent);
+  g.showIntent = g.misread ? (alt.length ? pick(alt) : "换地方") : g.intent;
+}
+
+function intentTarget(s, g, k) {
+  const vs = aliveV(s).filter(v => !v.protected);
+  if (!vs.length) return null;
+  switch (k) {
+    case "寻水": return vs.find(v => v.tags.includes("井水")) || null;
+    case "等人回头": return vs.find(v => v.tags.includes("送葬")) || null;
+    case "听哭": return vs.slice().sort((a, b) => b.fear - a.fear).find(v => v.fear >= 2) || null;
+    case "数窗": return vs.slice().sort((a, b) => a.fear - b.fear)[0] || null;
+    case "换地方": return pick(vs);
+    case "收纸": return vs.find(v => v.tags.includes("纸钱")) || pick(vs);
+    case "收棺": return vs.find(v => v.tags.includes("送葬")) || pick(vs);
+    case "守井": return vs.find(v => v.tags.includes("井水")) || null;
+    case "吃人": return pick(vs);
+    default: return pick(vs);
+  }
+}
+
+function killVillager(s, v, why) {
+  if (!v.alive) return false;
+  if (s.charm > 0 && !v.key) { s.charm = 0; log(`${v.name}命大，护身符替他挡了一下。`, "good"); addFear(v, 3); return false; }
+  v.alive = false; s.deadTonight++;
+  log(`${v.name}死了。${why || ""}`, "hit");
+  shuffle(aliveV(s)).slice(0, 2).forEach(o => addFear(o, 1));
+  if (v.key) doFlip(v);
+  return true;
+}
+
+function spend(n) { if (S.ap < n) { hint("行动点不够。"); return false; } S.ap -= n; return true; }
+
+function actInvestigate(gi, bone) {
+  const g = S.gs[gi];
+  if (!g || g.sealed || !isAwake(S, g)) return hint("这只鬼今夜不在。");
+  if (g.known[bone]) return hint("这一格已经问出来了。");
+  if (!spend(1)) return;
+  if (Math.random() < 0.25) { sfx("fail"); log(`${BONE_CN[bone]}这一处什么也没留下。白跑一趟。`, "hit"); return afterAct(); }
+  const r = addFrag(g, bone);
+  if (Math.random() < 0.35) gainItem();
+  if (Math.random() < 0.12) { S.scars++; sfx("hit"); log("那地方冷得不像话，你出来时手一直在抖（+1 伤痕）。", "hit"); if (S.scars >= 4) return finish("殉职"); }
+  if (r === "half") log(`${BONE_CN[bone]}：你只摸到半截（${g.frag[bone]}/2）。`, "");
+  if (Math.random() < 0.18) discoverOne();
+  afterAct();
+}
+
+function actFeed(gi, vi) {
+  const g = S.gs[gi], v = S.vs[vi];
+  if (!g || g.sealed || !isAwake(S, g)) return hint("这只鬼今夜不在。");
+  if (!v || !v.alive) return hint("这个人已经不在了。");
+  if (!S.items.饵) { sfx("fail"); return hint("推人得先有香饵——去调查周边，或问人换。"); }
+  if (!spend(1)) return;
+  S.items.饵--;
+  if (v.tags.includes(g.tag) && g.known.tag) {
+    killVillager(S, v, "你把他推了出去。");
+    S.fed[g.id] = 1; g.power += 5; sfx("hit"); float("喂到了", "good");
+    log(`${g.name}吃饱了，今夜不会再动。`, "good");
+  } else {
+    g.bonus += 15; addFear(v, 2); sfx("fail"); float("推错了 +15", "bad");
+    log(`推错了。${g.name}没被喂到，反倒躁了（+15 应验）。`, "hit");
+  }
+  afterAct();
+}
+
+function actLure(gi) {
+  const g = S.gs[gi];
+  if (!g || g.sealed) return hint("已经收过了。");
+  if (!isAwake(S, g)) return hint("这只鬼今夜不在。");
+  if (g.cancel) return hint("它今夜已经被引开了。");
+  if (!S.items.灯) { sfx("fail"); return hint("引开它要用引路灯。去调查周边找一盏。"); }
+  if (!spend(1)) return;
+  S.items.灯--;
+  g.cancel = 1; g.bonus += 10;
+  sfx("seal"); float("引开", "good");
+  log(`你把${g.name}的注意力引到镇外——它今夜空手，但记住了你（应验 +10）。`, "good");
+  afterAct();
+}
+
+function actWatch(vi) {
+  const v = S.vs[vi];
+  if (!v || !v.alive) return hint("这个人已经不在了。");
+  if (v.protected) return hint("已经守着了。");
+  if (!spend(1)) return;
+  v.protected = true; sfx("seal"); float("守夜", "good");
+  log(`你守了${v.name}一夜。`, "good");
+  afterAct();
+}
+
+function actBait(gi, vi) {
+  const g = S.gs[gi], v = S.vs[vi];
+  if (!g || g.sealed || !isAwake(S, g)) return hint("这只鬼今夜不在。");
+  if (!v || !v.alive) return hint("这个人已经不在了。");
+  if (!spend(1)) return;
+  g.bait = v.id; addFear(v, 2);
+  log(`你把${v.name}的贴身衣物挂在${g.name}看得见的地方——它今夜只会追他。`, "good");
+  afterAct();
+}
+
+function actTalisman(gi, bone) {
+  const g = S.gs[gi];
+  if (!g || g.sealed || !isAwake(S, g)) return hint("这只鬼今夜不在。");
+  if (g.known[bone]) return hint("这一格已经清楚了。");
+  if (!S.talisman) { sfx("fail"); return hint("符用完了——先生一夜只画得出两张。"); }
+  if (!spend(1)) return;
+  S.talisman--;
+  g.frag[bone] = 1; addFrag(g, bone);
+  sfx("seal"); float("符 · 拆律", "good");
+  log(`你画了一张符按在${g.name}的律上——${BONE_CN[bone]}直接烧穿了。`, "big");
+  if (Math.random() < 0.3) { S.scars++; sfx("hit"); log("笔尖上的血还没干（+1 伤痕）。", "hit"); }
+  if (S.scars >= 4) return finish("殉职");
+  afterAct();
+}
+
+function actShoot(gi) {
+  const g = S.gs[gi];
+  if (!g || g.sealed) return hint("已经收过了。");
+  if (!isAwake(S, g)) return hint("这只鬼今夜不在。");
+  if (!S.ammo) { sfx("fail"); return hint("没子弹了。"); }
+  if (g.type === "rule") { sfx("fail"); return hint("枪对它没用——子弹打进它身体里，像打进一口井。"); }
+  if (!spend(1)) return;
+  S.ammo--;
+  g.cancel = 1; g.power = Math.max(10, g.power - 40);
+  sfx("shot"); shake(); float("中枪 −40", "good");
+  log(`枪响了。${g.name}被打退，今夜不再动（应验 ${g.power + 40} → ${g.power}）。`, "big");
+  if (g.power <= 20) log(`它退回河那边去了——这一夜它不会再回来。`, "good");
+  afterAct();
+}
+
+function actCollide(g1, g2) {
+  const a = S.gs[g1], b = S.gs[g2];
+  if (!a || !b || a === b) return hint("要两只鬼。");
+  if (a.sealed || b.sealed || !isAwake(S, a) || !isAwake(S, b)) return hint("有一只不在场。");
+  if (!a.known.law || !b.known.law) { sfx("fail"); return hint("得先知道两只鬼的律文，才能让它们撞。"); }
+  if (S.ap < 2) return hint("撞律要 2 个行动点。");
+  const same = a.rank === b.rank;
+  const usePact = !same && S.pact > 0;
+  if (!same && !usePact && a.rank !== b.rank) log(`律值不同（${a.rank} / ${b.rank}）——没有合契符，只能硬撞。`, "hit");
+  if (usePact) { S.pact--; }
+  spend(2); sfx("collide"); shake(); float("撞律", "big");
+  if (same || usePact) {
+    a.dazed = 3; b.dazed = 3; a.dazeTwin = b.id; b.dazeTwin = a.id;
+    log(`两律对撞——「死机」。${a.name}与${b.name}互相咬住，三夜之内收不走，它们会合成一只。`, "big");
+  } else {
+    const low = a.rank < b.rank ? a : b, high = a.rank < b.rank ? b : a;
+    if (Math.random() < 0.35 + (low.power - high.power) / 300) {
+      high.dazed = 2; high.dazeTwin = low.id;
+      log(`${high.name}被${low.name}的律咬住了，两夜不能动。`, "big");
+    } else {
+      low.power -= 10; low.bonus += 10; S.scars++;
+      log(`撞歪了。${low.name}被弹开，应验降到 ${low.power}。你也被震伤了（+1 伤痕）。`, "hit");
+      if (S.scars >= 4) return finish("殉职");
+    }
+  }
+  if (Math.random() < 0.5) { S.scars++; log("你被震得咳了口血（+1 伤痕）。", "hit"); }
+  afterAct();
+}
+
+function actSeal(gi) {
+  const g = S.gs[gi];
+  if (!g || g.sealed) return hint("已经收过了。");
+  if (!isAwake(S, g)) return hint("这只鬼今夜不在。");
+  if (g.bones > 1) { sfx("fail"); return hint(`律骨还剩 ${g.bones} 根，拆到剩一根才送得走。`); }
+  if (!S.tools) return hint("葬具用完了——剩下的鬼只能拆，收不了。");
+  if (!spend(1)) return;
+  S.tools--; sfx("seal"); float("送走", "big");
+  seal(g);
+  afterAct();
+}
+
+function seal(g) {
+  g.sealed = true; S.sealedCount++;
+  if (g.bones <= 1) { S.freed++; log(`「送走」——${g.name}的律被拆得只剩一边，它回不来了。`, "good"); }
+  else log(`「落葬」——${g.name}被封进匣里。`, "good");
+  if (g.dazeTwin !== undefined && S.gs[g.dazeTwin] && !S.gs[g.dazeTwin].sealed) {
+    const t = S.gs[g.dazeTwin];
+    t.dazed = 0;
+    log(`${t.name}失去了对手，也从对峙里脱了出来。`, "night");
+  }
+}
+
+const TALK = {
+  closed: [
+    "门闩落下的声音。屋里的灯跟着灭了。",
+    "{n}隔着门板：天晚了，回去吧。",
+    "{n}没应声。窗纸后头有个影子，把帘子拉上了。",
+    "{n}：「我一个寡居的人，不好跟你说话。」",
+    "{n}看见你腰上的东西，把门关上了。",
+    "{n}在门后头说了句什么，你只听见「别连累我」。"
+  ],
+  half: [
+    "{n}：「关于{f}，我只听了一半。」",
+    "{n}压低声音：「{f}……这话我说不准。」",
+    "{n}想了很久，才吐出半句：「{f}。」",
+    "{n}把你拉到墙角：「别问我从哪听来的——{f}。」",
+    "{n}盯着地：「{f}，我娘临死前念过这四个字。」",
+    "{n}手里的活停了：「你说的那个，跟{f}有关。」"
+  ],
+  none: [
+    "「这镇上有些事，问不得。」",
+    "「你说的这个，我不清楚。」",
+    "「夜里别出门，别的我管不了。」",
+    "「知道得越多，死得越快。」",
+    "「我只想活到收完今年这茬。」",
+    "「问完了就走吧，别在我家门口站着。」"
+  ],
+  gossip: [
+    "「{t}，别的我不知道。」",
+    "「我这人{t}，帮不上你什么忙。」",
+    "「你要问的是陈年旧事，我只知道{t}。」",
+    "「{t}——就这些，管饭吗？」",
+    "「{t}，我爹也是{t}，他去年没了。」"
+  ],
+  fear: [
+    "「你……别再问了。」",
+    "{n}盯着你身后看，一句话也不说。",
+    "{n}往后退了半步，手里的东西掉在地上。",
+    "{n}忽然抓住你袖子：你听见了吗，刚才。",
+    "{n}的声音抖得不成句：「它、它刚才就在门口。」"
+  ],
+  hint: [
+    "「它今晚像是往东边去了。」",
+    "「你听，又在敲了。」",
+    "「那东西只认一件事，认准了就不撒手。」",
+    "「今晚谁家门没关严，就悬了。」",
+    "「我闻见一股纸灰味，从西边来的。」"
+  ]
+};
+const tl = (arr, v, ex) => pick(arr).replace("{n}", v ? v.name : "").replace("{t}", v ? v.trait : "").replace("{f}", ex || "");
+function actTalk(vi) {
+  const v = S.vs[vi];
+  if (!v || !v.alive) return hint("这个人已经不在了。");
+  if (S.talk <= 0) return hint("今夜说不下去了。");
+  S.talk--; v.talked++;
+  const trust = S.identity.includes("先生") ? 0.65 : S.identity.includes("巡夜警") ? 0.8 : 0.85;
+  if (Math.random() > trust) {
+    addFear(v, 1); sfx("fail");
+    log(tl(TALK.closed, v), "hit");
+    return afterAct();
+  }
+  if (v.fear >= 3 && Math.random() < 0.4) {
+    addFear(v, 1); log(tl(TALK.fear, v), "hit");
+    return afterAct();
+  }
+  const awake = liveG(S).filter(g => isAwake(S, g) && !g.isBrute);
+  if (v.key && v.talked >= 2) {
+    log(tl([
+      "{n}松了口：「私心是这么一件事——」",
+      "{n}压着嗓子：「说出来，我这辈子就完了。」",
+      "{n}看了你很久：「行，我告诉你。」"
+    ], v) + `他的条件是：「${v.kf.ask}」——他替你把一只鬼拼完了一格。`, "good");
+    const g = awake.find(g => g.bones > 0);
+    if (g) { const b = BONES.find(b => !g.known[b]) || "law"; addFrag(g, b); addFrag(g, b); }
+    return afterAct();
+  }
+  if (Math.random() < 0.6) {
+    let g = awake.length ? pick(awake) : null;
+    if (Math.random() < 0.3) g = discoverOne() || g;
+    const open = g ? BONES.filter(b => !g.known[b]) : [];
+    if (g && open.length) {
+      const b = pick(open);
+      addFrag(g, b);
+      log(tl(TALK.half, v, FRAG_TXT[b]) + `（${g.frag[b]}/2）`, "");
+    } else {
+      log(tl(TALK.none, v), "");
+    }
+    if (Math.random() < 0.2) discoverOne();
+  } else if (Math.random() < 0.4) {
+    const g = discoverOne();
+    log(g ? tl(TALK.hint, v) : tl(TALK.none, v), "");
+  } else {
+    if (Math.random() < 0.25 && awake.length) log(tl(TALK.hint, v), "");
+    else log(tl(TALK.gossip, v), "");
+  }
+  afterAct();
+}
+
+function playCard(i) {
+  const c = S.hand[i];
+  if (!c) return;
+  const needsG = ["验尸", "翻档", "别回头", "封匣", "驾驭契"].includes(c.name);
+  if (needsG) {
+    const g = UI.ghost != null ? S.gs[UI.ghost] : null;
+    if (!g || g.sealed) return hint("先在上面点一只鬼，再用这张牌。");
+  }
+  c.act({ s: S, onGhost: (pred, fn) => { const g = S.gs[UI.ghost]; if (g && pred(g)) fn(g); } });
+  S.hand.splice(i, 1);
+  afterAct();
+}
+
+function afterAct() { S.turn++; render(); }
+
+function endNight() {
+  const s = S;
+  if (s.fearAll) { s.fearAll = 0; aliveV(s).forEach(v => addFear(v, 1)); }
+  const br = s.gs.find(g => g.isBrute && isAwake(s, g) && !g.sealed);
+  if (br) {
+    if (br.cancel) log("渡客今夜被引到了镇外。", "good");
+    else if (br.ctrl > 0) { br.ctrl--; log("渡客今夜听你的。", "good"); }
+    else {
+      const v = pick(aliveV(s));
+      if (v) { log("渡客不掷骰子。它只要一个人。", "hit"); killVillager(s, v, "被渡客带走了。"); }
+      else { s.scars += 2; log("镇上已经没人了。它转向你（+2 伤痕）。", "hit"); }
+    }
+  }
+  let regDead = 0;
+  liveG(s).filter(g => isAwake(s, g) && !g.isBrute).forEach(g => {
+    if (s.fed[g.id]) return;
+    if (g.cancel || g.ctrl > 0) { if (g.ctrl > 0) g.ctrl--; log(`${g.name}今夜什么也没做。`, ""); return; }
+    if (g.dazed > 0) {
+      g.dazed--;
+      if (g.dazed === 0) mergeTwin(s, g);
+      return;
+    }
+    if (g.bait != null) {
+      const v = s.vs[g.bait];
+      g.bait = null;
+      if (v && v.alive) {
+        if (!v.protected) killVillager(s, v, `${g.name}追着他去了。`);
+        else log(`${v.name}被你守着，${g.name}扑了个空。`, "good");
+      }
+      return;
+    }
+    const t = intentTarget(s, g, g.intent);
+    if (!t) { log(`${g.name}空手而归。`, "good"); return; }
+    if (t.protected) { log(`${g.name}扑向${t.name}，被你挡回去了。`, "good"); return; }
+    const hit = Math.random() * 100 < clamp(g.power + g.bonus, 5, 160);
+    if (hit && regDead === 0) { if (killVillager(s, t, `应验了它的律（${t.name}）。`)) regDead++; }
+    else if (hit) log(`别的鬼也来了——可今夜的血已经有人喝了。`, "night");
+    else log(`${g.name}的律没有应验——${t.name}逃过一劫。`, "good");
+    g.bonus = 0;
+  });
+  if (s.deadTonight === 0 && liveG(s).length > 0 && Math.random() < 0.3) {
+    const v = pick(aliveV(s));
+    if (v) killVillager(s, v, "夜里总得有人死。");
+  }
+  if (s.ward > 0 && s.deadTonight > 0) { log("引魂灯替一个亡魂照了路。", "good"); }
+  if (s.sealedCount > 0 && Math.random() < 0.3) {
+    const v = pick(aliveV(s));
+    if (v) killVillager(s, v, "你埋下去的东西，夜里往外渗。");
+  }
+  s.vs.filter(v => v.flip === "pending").forEach(v => { v.flip = null; doFlip(v); });
+  s.night++;
+  if (s.night > NIGHTS) return finish();
+  if (s.scars >= 4) return finish("殉职");
+  if (aliveV(s).length === 0) return finish("镇民把你撕碎");
+  if (s.night === 3) { s.occupied = [1, 1, 0, 0]; s.gs[1].discovered = true; log("第二只鬼来了——它是被第一只引来的。", "night"); }
+  if (s.night === 4) { s.occupied = [1, 1, 0, 1]; s.gs[3].discovered = true; log("镇上来了个不认律的东西——凶鬼「渡客」。它每夜必带走一个人，掷骰子救不了。", "hit"); }
+  if (s.night === 6) { s.occupied = [1, 1, 1, 1]; s.gs[2].discovered = true; log("第三只。镇子已经不像镇子了。", "night"); }
+  startNight(s);
+  drawOffer();
+  render();
+}
+
+function mergeTwin(s, g) {
+  const t = s.gs[g.dazeTwin];
+  if (!t || t.sealed) { g.dazed = 0; return; }
+  if (!s.merged) {
+    s.merged = true;
+    g.merged = true; t.merged = true;
+    g.name = `${g.name}·${t.name}`;
+    g.power = g.power + t.power + 40; g.bones = 8;
+    log(`三日已过，没人收走它们——${g.name}合在了一起。`, "hit");
+  }
+}
+
+function drawOffer() {
+  const two = [S.deck.pop(), S.deck.pop()].filter(Boolean);
+  UI.draw = two.length ? two : null;
+}
+
+function doFlip(v) {
+  const good = Math.random() < 0.45;
+  const card = v.key ? (good ? v.kf.good : v.kf.bad) : (good ? pick(FLIP_GOOD) : pick(FLIP_BAD));
+  S.flips++;
+  UI.banner = { good, who: v.name, title: card.t, desc: card.d };
+  applyFlip(v, card);
+}
+function applyFlip(v, card) {
+  const s = S, t = card.t;
+  if (t === "守夜人") aliveV(s).forEach(x => x.protected = true);
+  else if (t === "殉道") s.charm = 1;
+  else if (t === "揭发") { const g = liveG(s)[0]; if (g) { g.known.rank = 1; if (g.bones > 0) { g.bones--; g.power -= 15; } } }
+  else if (t === "守口") aliveV(s).forEach(x => { x.fear = Math.max(0, x.fear - 1); });
+  else if (t === "药方") { const d = s.vs.find(x => !x.alive); if (d) { d.alive = true; d.fear = 3; log(`${d.name}又睁开了眼。`, "good"); } }
+  else if (t === "开口") { const g = liveG(s)[0]; if (g) BONES.forEach(b => g.known[b] = 1); }
+  else if (t === "改志") { const g = liveG(s)[0]; if (g) { g.known.law = 1; g.known.phys = 1; } }
+  else if (t === "闭门") { s.sealedLock = 1; }
+  else if (t === "入井") { const x = pick(aliveV(s)); if (x) killVillager(s, x, "井里有人叫了一声。"); }
+  else if (t === "焚志") { const g = liveG(s)[0]; if (g) g.known.law = 0; }
+  else if (t === "告密") liveG(s).forEach(g => { g.bonus += 10; });
+  else if (t === "替死") { const xs = aliveV(s).filter(x => x.id !== v.id); if (xs.length) killVillager(s, pick(xs), "他推了身边那个人。"); }
+  else if (t === "逃镇") { v.alive = false; s.deadTonight++; const x = pick(aliveV(s)); if (x) { x.alive = false; s.deadTonight++; } }
+  else if (t === "疯癫") aliveV(s).forEach(x => addFear(x, 1));
+}
+
+function finish(force) {
+  const s = S;
+  if (s.ended) return;
+  s.ended = true;
+  const keys = s.vs.filter(v => v.key && v.alive).length;
+  const pop = aliveV(s).length;
+  let e;
+  if (force) e = force;
+  else if (s.merged) e = "你造的东西";
+  else if (s.freed === 3) e = "送走";
+  else if (s.drives >= 2) e = "同类";
+  else if (keys === 0 && liveG(s).length >= 2) e = "镇民把你撕碎";
+  else if (keys === 0 && liveG(s).length <= 1) e = "孤证";
+  else if (s.sealedCount === 0) e = "镇约";
+  else if (keys >= 2 && pop >= 6) e = "结案";
+  else if (keys >= 2) e = "勉强";
+  else e = "镇约";
+  const text = {
+    "送走": "你把三只鬼的律一根根拆干净，它们回不来了。天亮时镇上没有钟声，只有人在哭。",
+    "结案": "卷宗交上去了。稽查处的印盖得很轻，像怕惊动什么。镇上的人记得你。",
+    "勉强": "案子结了，人也少了。有人在你背后说，那东西是被你带来的。",
+    "孤证": "没有一个人能替你作证。你在卷宗最后一页写下：以上属实，无人可证。",
+    "镇民把你撕碎": "他们认出你身上那股味道了。天亮之前，你就不在了。",
+    "同类": "你用了太多次它。镜子里那张脸，笑的方式不太对了。",
+    "殉职": "第四道伤在胸口。你倒下时，镇志上你的名字已经写好了。",
+    "你造的东西": "两只鬼合在一处。它还认得你——它叫了你的名字。",
+    "镇约": "镇上恢复了安静。有些东西被重新压回了土里，只是没人知道压得牢不牢。"
+  }[e] || "";
+  s.ending = { e, text };
+  try { s.runs = (+localStorage.getItem("zy_runs") || 0) + 1; } catch (err) { s.runs = 1; }
+  try { localStorage.setItem("zy_runs", s.runs); } catch (err) {}
+  render();
+}
+
+function render() {
+  if (window.__noRender) return;
+  const s = S;
+  const app = document.getElementById("app");
+  if (!s) { app.innerHTML = introHTML(); bindIntro(); return; }
+  if (s.ended) { app.innerHTML = overHTML(); bindOver(); return; }
+  const apMax = (s.identity.includes("先生") ? 5 : s.identity.includes("稽查员") ? 4 : 3);
+  const gsList = s.gs.filter(g => (g.discovered || isAwake(s, g) || g.sealed || g.merged));
+  app.innerHTML = `
+  <header>
+    <div class="brand">镇约<small>第 ${s.night} / ${NIGHTS} 夜 · ${s.identity}</small></div><button id="mute" class="mute">🔊</button>
+    <div class="meter">
+      <div class="m"><span>伤痕 <b>${s.scars}/4</b></span><div class="pips sc">${[0,1,2,3].map(i => `<i class="${i < s.scars ? "on" : ""} ${s.scars >= 3 && i < s.scars ? "hi" : ""}"></i>`).join("")}</div></div>
+      <div class="m"><span>行动 <b>${s.ap}/${apMax}</b></span><div class="pips ap">${Array.from({ length: apMax }).map((_, i) => `<i class="${i < s.ap ? "on" : ""}"></i>`).join("")}</div></div>
+    </div>
+  </header>
+  <div class="logwrap"><div id="lastlog" data-log="1" class="lastlog ${s.logs.length ? s.logs[s.logs.length - 1].c : ""}"><span class="ll-lbl">夜记</span><span class="ll-txt">${s.logs.length ? s.logs[s.logs.length - 1].t : "……"}</span><span class="ll-more">${UI.logOpen ? "收起" : "全部"}</span></div>
+  ${UI.logOpen ? `<div id="log">${s.logs.slice(-14).map(l => `<p class="${l.c}">${l.t}</p>`).join("")}</div>` : ""}</div>
+  ${UI.banner ? `<div class="banner ${UI.banner.good ? "good" : "bad"}"><div class="who">${UI.banner.who} · 翻面</div><h3>${UI.banner.title}</h3><p>${UI.banner.desc}</p></div>` : ""}
+  ${UI.draw ? drawHTML() : ""}
+  <div class="sec-title">在场<em>${liveG(s).length} 只 · 葬具 ${s.tools}</em></div>
+  ${gsList.map(g => ghostHTML(s, g)).join("")}
+  ${hiddenGhostCount(s) ? `<div class="card ghost ghostfind" id="findghost"><div class="top"><span class="gname unk">还有没弄清的东西</span><span class="chip">查 · 1 行动</span></div><p class="rumor">镇上不止你看见的那点动静。</p></div>` : ""}
+  <div class="pouch"><span>道具</span><b>香饵 ×${s.items.饵}</b><b>引路灯 ×${s.items.灯}</b><b>合契符 ×${s.items.契}</b>${s.identity.includes("巡夜警") ? `<b>子弹 ×${s.ammo}</b>` : ""}<em>调查周边有机会捡到</em></div>
+  <div class="sec-title">镇民<em>${aliveV(s).length} 活 · 还能说 ${s.talk} 次 · 红条＝恐惧，满 5 翻面</em></div>
+  <div class="people">${s.vs.map(v => personHTML(s, v)).join("")}</div>
+  <div class="sec-title">手牌<em>${s.hand.length} / 4</em></div>
+  <div class="hand">${s.hand.map(cardHTML).join("")}${Array.from({ length: 4 - s.hand.length }).map(() => `<div class="hcard back"></div>`).join("")}</div>
+  <div id="hint">${UI.hint}</div>
+  <div id="actions">
+    <div id="guide">${guideText(s)}</div>
+    <div id="btns">
+      ${actHTML("look", "查", "1 行动", s.ap < 1)}
+      ${actHTML("watch", "守夜", "1 行动", s.ap < 1)}
+      ${actHTML("collide", "撞律", "2 行动", s.ap < 2)}
+      ${s.identity.includes("先生") ? actHTML("talisman", "符咒", `${s.talisman} 张`, s.ap < 1 || !s.talisman) : ""}
+      ${s.identity.includes("巡夜警") ? actHTML("shoot", "开枪", `${s.ammo} 发`, s.ap < 1 || !s.ammo) : ""}
+      ${actHTML("hand", "动手", "1 行动", s.ap < 1)}
+      ${actHTML("seal", "送走", "1 行动", s.ap < 1)}
+      <button class="btn wide primary" id="end">结束今夜</button>
+    </div>
+  </div>
+  `;
+  bindGame();
+}
+
+
+function hiddenGhostCount(s) { return s.gs.filter(g => !g.discovered && !g.isBrute).length; }
+function actFind() {
+  if (S.ap < 1) return hint("今夜没力气了。");
+  S.ap--; sfx("click");
+  log(pick([
+    "你顺着湿脚印走到镇子另一头，站了很久。",
+    "你把耳朵贴在柴房的门上，里头安静得不像话。",
+    "你在井台边蹲下，闻见一股水腥味。"
+  ]), "");
+  if (Math.random() < 0.7) { const g = discoverOne(); if (g) { S.log[0].c = "night"; } }
+  else log("你绕了一圈，什么也没碰上。只有风。", "");
+  afterAct();
+}
+
+function ghostHTML(s, g) {
+  if (g.isBrute) {
+    const sel = UI.ghost === g.id ? "sel" : "";
+    return `<div class="card ghost brute ${sel}" data-g="${g.id}">
+      <div class="top"><span class="gname">${g.discovered ? g.name : "（尚未确认）"}</span>
+        <span class="chip rank">凶鬼</span><span class="power">每夜必死 <b>1</b> 人</span></div>
+      <p class="rumor">它不掷骰子，也不认律。引路灯能把它支开；拿人喂没用。</p>
+      <div class="intelhint">送不走 · 拆不开 · 只能躲</div></div>`;
+  }
+  if (g.sealed) {
+    return `<div class="card ghost dim"><div class="top"><span class="gname">${g.name}</span>
+      <span class="chip done">${g.bones === 0 ? "已送走" : "已落葬"}</span></div></div>`;
+  }
+  const sel = UI.ghost === g.id ? "sel" : "";
+  const dz = g.dazed > 0 ? "dazed" : "";
+  const known = BONES.filter(b => g.known[b]).length;
+  const cells = BONES.map(b => {
+    const k = g.known[b];
+    const val = b === "tag" ? g.tag : b === "rank" ? g.rank : (g.phys ? "有" : "无");
+    const f = g.frag ? g.frag[b] : 0;
+    const canPick = !k && isAwake(s, g);
+    return `<div class="cell ${k ? "k" : "q"} ${canPick ? "pick" : ""}" ${k ? "" : `data-bone="${b}" data-g="${g.id}"`}>
+      <b>${k ? (b === "law" ? "已读" : val) : f ? "半" : "?"}</b><span>${BONE_CN[b]}${!k && f ? ` ${f}/2` : ""}</span></div>`;
+  }).join("");
+  const intentTxt = g.showIntent ? INTENT_CN[g.showIntent] : "…";
+  return `<div class="card ghost ${sel} ${dz}" data-g="${g.id}">
+    <div class="top"><span class="gname ${g.identified ? "" : "unk"}">${g.identified ? g.name : known ? "有东西，未敢认名" : "（尚未确认）"}</span>
+      <span class="chip ${g.type === "value" ? "rank" : ""}">${g.type === "rule" ? "规则" : "数值"}</span>
+      ${g.dazed > 0 ? `<span class="chip done">对峙 ${g.dazed} 夜</span>` : ""}
+      <span class="power">应验 <b>${g.power + g.bonus}</b><small>/100</small></span></div>
+    ${g.known.law ? `<div class="law">${g.law.replace(/(井水|送葬|哭声|数窗|纸钱|路口|饭|血)/, "<em>$1</em>")}</div>`
+      : `<p class="rumor">传闻：${g.rumor}</p>`}
+    <div class="intent ${g.misread && known >= 1 ? "warn" : ""}"><span class="lbl">今夜</span><span class="itxt">${intentTxt}</span>${g.misread && known >= 1 ? `<span class="unsure">没把握</span>` : ""}</div>
+    <div class="intel">${cells}</div>
+    <div class="intelhint">点亮格子 = 拆一根律骨 · 1 行动</div>
+    <div class="bonebar"><div class="bar"><i style="width:${Math.round(((g.bones0 || 4) - g.bones) / (g.bones0 || 4) * 100)}%"></i></div><span class="barlbl">律骨 ${(g.bones0 || 4) - g.bones}/${g.bones0 || 4}</span></div>
+  </div>`;
+}
+
+function personHTML(s, v) {
+  if (!v.alive) return `<div class="person dead"><div class="pn">${v.name}</div><div class="tags"><span class="tag">已死</span></div></div>`;
+  const sel = UI.villager === v.id ? "sel" : "";
+  const tags = v.tags.map(t => `<span class="tag ${TAG_CLS[t] || ""}">${t}</span>`).join("");
+  const fear = [0,1,2,3,4].map(i => `<i class="${i < v.fear ? (v.fear >= 4 ? "on hi" : "on") : ""}"></i>`).join("");
+  return `<div class="person ${v.key ? "key" : ""} ${sel} ${v.protected ? "prot" : ""}" data-v="${v.id}">
+    <div class="pn">${v.key ? "◆ " : ""}${v.name}<span style="margin-left:auto;color:var(--faint);font-size:9.5px">${v.key ? v.kf.role : v.trait}</span></div>
+    <div class="tags">${tags}${v.protected ? `<span class="tag match">守夜中</span>` : ""}</div>
+    <div class="fear">${fear}</div>
+  </div>`;
+}
+function cardHTML(c, i) { return `<div class="hcard" data-card="${i}"><span class="cls">${c.cls}</span><b>${c.name}</b>${c.d}</div>`; }
+function drawHTML() {
+  return `<div class="card"><div class="sec-title" style="margin:0 0 6px">今夜带一件镇物<em>二选一</em></div>
+    <div class="pick">${UI.draw.map((c, i) => `<div class="hcard" data-draw="${i}"><span class="cls">${c.cls}</span><b>${c.name}</b>${c.d}</div>`).join("")}</div></div>`;
+}
+function actHTML(mode, label, cost, off) {
+  return `<button class="btn ${UI.mode === mode ? "on" : ""} ${off ? "off" : ""}" data-mode="${mode}" ${off ? "disabled" : ""}>${label}<small>${cost}</small></button>`;
+}
+
+function hint(t) { UI.hint = t; render(); }
+
+/* ---------- 声音：全部用 WebAudio 现场合成，不加载任何文件 ---------- */
+let AC = null, MUTE = false;
+function ac() {
+  if (MUTE) return null;
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (AC.state === "suspended") AC.resume();
+  return AC;
+}
+function tone(freq, dur, type, gain, slideTo) {
+  const c = ac(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || "sine"; o.frequency.value = freq;
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, c.currentTime + dur);
+  g.gain.value = 0; g.gain.linearRampToValueAtTime(gain || .12, c.currentTime + .01);
+  g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + dur);
+  o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + dur + .02);
+}
+function noise(dur, gain, hp) {
+  const c = ac(); if (!c) return;
+  const n = c.sampleRate * dur, buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const s = c.createBufferSource(); s.buffer = buf;
+  const f = c.createBiquadFilter(); f.type = "highpass"; f.frequency.value = hp || 400;
+  const g = c.createGain(); g.gain.value = gain || .1;
+  s.connect(f); f.connect(g); g.connect(c.destination); s.start();
+}
+function sfx(k) {
+  if (window.__noRender) return;
+  switch (k) {
+    case "click": tone(760, .05, "square", .05); break;
+    case "tap": tone(520, .05, "sine", .07); break;
+    case "good2": tone(880, .12, "triangle", .07, 1100); break;
+    case "bone": tone(220, .14, "triangle", .13, 460); break;
+    case "hit": tone(90, .28, "sine", .22, 55); noise(.18, .09, 300); break;
+    case "fail": tone(180, .16, "square", .09, 120); break;
+    case "flip": tone(420, .1, "triangle", .12, 700); setTimeout(() => tone(700, .18, "triangle", .1, 520), 90); break;
+    case "night": tone(70, .5, "sine", .16, 50); noise(.3, .05, 200); break;
+    case "seal": tone(120, .3, "sine", .18, 80); setTimeout(() => tone(660, .5, "sine", .08, 640), 120); break;
+    case "collide": noise(.4, .18, 120); tone(60, .6, "sawtooth", .16, 40); break;
+    case "shot": noise(.16, .3, 900); tone(120, .18, "square", .2, 40); break;
+  }
+}
+/* ---------- 飘字与抖动：让每次点击都有"响" ---------- */
+function float(text, cls) {
+  if (window.__noRender) return;
+  const el = document.createElement("div");
+  el.className = "float " + (cls || "");
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+function shake() {
+  if (window.__noRender) return;
+  const a = document.getElementById("app");
+  if (!a) return;
+  a.classList.remove("shaking"); void a.offsetWidth; a.classList.add("shaking");
+}
+
+function guideText(s) {
+  if (UI.mode === "look") return "查：点鬼身上带 ? 的格子 = 调查那片地方（一格要 2 条碎片，可能白跑，也可能捡到道具）；点人 = 问话（一次只给一条碎片，还可能问空）。";
+  if (UI.mode === "hand") {
+    const two = liveG(s).filter(g => isAwake(s, g) && !g.sealed && g.known.law).length >= 2;
+    if (two) return "动手：点一只鬼 → 再点另一只鬼 = 撞律（2 行动，两只律文都得知道；律值不同要合契符）；点人 = 推给他吃（要香饵）。";
+    return "动手：点一只鬼 → 再点它自己 = 引开（要引路灯，今夜空手但记住你）→ 或点一个人 = 推给他吃（要香饵）。";
+  }
+  if (UI.mode === "watch") return "守夜：点一个人，今夜它找上门，你替他挡下（1 行动）。";
+  if (UI.mode === "talisman") return "符咒：点鬼身上任意一个 ? 格子，直接拆掉这一格（1 行动 + 1 张符，30% 反噬 +1 伤痕）。";
+  if (UI.mode === "shoot") return "开枪：点一只数值鬼或凶鬼（1 行动 + 1 发子弹，打退它并削 40 应验）。规则鬼打不动。";
+  if (UI.mode === "collide") {
+    const ready = liveG(s).filter(g => isAwake(s, g) && !g.sealed && g.known.law).length;
+    if (ready >= 2) return "撞律：点第一只鬼 → 再点第二只（2 行动。律值相同必死机；不同也能硬撞，有合契符则必成）。";
+    return `撞律：得先读出两只鬼的律文。现在只有 ${ready} 只的律文是清楚的。`;
+  }
+  if (UI.mode === "seal") return "送走：点一只律骨拆到剩一根的鬼（要 1 件葬具，只有 3 件）。";
+  return "先选一个动作。查 = 找线索，动手 = 拿人换时间，送走 = 把鬼埋掉。";
+}
+
+function bindGame() {
+  const fg = document.getElementById("findghost");
+  if (fg) fg.onclick = () => actFind();
+  document.querySelectorAll("[data-mode]").forEach(el => el.onclick = () => {
+    const m = el.dataset.mode; UI.mode = UI.mode === m ? null : m; UI.personSel = null; sfx("click"); render();
+  });
+  document.querySelectorAll(".ghost[data-g]").forEach(el => el.onclick = e => {
+    if (e.target.dataset.bone) return;
+    const id = +el.dataset.g;
+    if (UI.mode === "seal") return actSeal(id);
+    if (UI.mode === "shoot") return actShoot(id);
+    if (UI.mode === "collide") {
+      if (UI.ghost == null) { UI.ghost = id; sfx("click"); return render(); }
+      if (UI.ghost === id) return hint("撞律要两只鬼：再点另一只。");
+      return actCollide(UI.ghost, id);
+    }
+    if (UI.mode === "hand") {
+      if (UI.ghost == null) { UI.ghost = id; sfx("click"); return render(); }
+      if (UI.ghost === id) return actLure(id);
+      return actCollide(UI.ghost, id);
+    }
+    UI.ghost = UI.ghost === id ? null : id; UI.personSel = null; sfx("click"); render();
+  });
+  document.querySelectorAll("[data-bone]").forEach(el => el.onclick = e => { e.stopPropagation(); if (UI.mode === "talisman") return actTalisman(+el.dataset.g, el.dataset.bone); actInvestigate(+el.dataset.g, el.dataset.bone); });
+  document.querySelectorAll(".person[data-v]").forEach(el => el.onclick = () => {
+    const id = +el.dataset.v;
+    if (UI.mode === "look") return actTalk(id);
+    if (UI.mode === "watch") return actWatch(id);
+    if (UI.mode === "hand") {
+      if (UI.ghost == null) { sfx("fail"); return hint("先点一只鬼，再点人。"); }
+      return actFeed(UI.ghost, id);
+    }
+    UI.villager = id; sfx("click"); render();
+  });
+  document.querySelectorAll("[data-card]").forEach(el => el.onclick = () => playCard(+el.dataset.card));
+  document.querySelectorAll("[data-draw]").forEach(el => el.onclick = () => {
+    const c = UI.draw[+el.dataset.draw];
+    if (c && S.hand.length < 4) S.hand.push(c);
+    UI.draw = null; sfx("click"); render();
+  });
+  const ll = document.getElementById("lastlog"); if (ll) ll.onclick = () => { UI.logOpen = !UI.logOpen; sfx("click"); render(); };
+  const mute = document.getElementById("mute"); if (mute) mute.onclick = () => { MUTE = !MUTE; mute.textContent = MUTE ? "🔇" : "🔊"; if (!MUTE) sfx("click"); };
+  const b = document.getElementById("end"); if (b) b.onclick = endNight;
+  const bn = document.querySelector(".banner"); if (bn) bn.onclick = () => { UI.banner = null; render(); };
+}
+
+function introHTML() {
+  return `<header><div class="brand">镇约<small>第一案 · 失踪</small></div></header>
+  <div class="over">
+    <p class="left">民国二十六年，民俗事务调查处。<br><br>
+    镇上报了一起失踪。你被派去核对，并在卷宗上签字。<br><br>
+    ——这不是捉鬼，是把字签完。</p>
+  </div>
+  <div class="sec-title">选择你的身份<em>难度不同 · 打法不同</em></div>
+  ${[
+    { k: "民间先生", d: "行动 5 · 拆律最狠 · 但镇上的人不认你，说十句话也许七句没人应" },
+    { k: "外勤稽查员", d: "行动 4 · 有调令，镇民肯配合 · 处置要上报，手脚慢半拍" },
+    { k: "巡夜警", d: "行动 3 · 有枪，对数值鬼最有效 · 对规则鬼几乎无解" }
+  ].map(x => `<div class="card" data-id="${x.k}" style="cursor:pointer;margin-bottom:7px">
+    <div class="gname">${x.k}</div><p style="margin:4px 0 0;font-size:12px;color:#9b9078">${x.d}</p></div>`).join("")}`;
+}
+function bindIntro() {
+  document.querySelectorAll("[data-id]").forEach(el => el.onclick = () => {
+    S = newState(el.dataset.id); startNight(S); drawOffer(); render();
+  });
+}
+function overHTML() {
+  const s = S, e = s.ending;
+  return `<header><div class="brand">镇约<small>第 ${s.night} 夜</small></div></header>
+  <div class="over"><h2>${e.e}</h2><div class="sub">第 ${s.runs} 局</div><p>${e.text}</p>
+    <div class="stats">
+      <div><b>${aliveV(s).length}</b>活着的人</div>
+      <div><b>${s.sealedCount}</b>收走的鬼</div>
+      <div><b>${s.scars}</b>伤痕</div>
+      <div><b>${s.intel}</b>查明的律骨</div>
+      <div><b>${s.flips}</b>次翻面</div>
+      <div><b>${s.freed}</b>只送走</div>
+    </div>
+    <button class="again" id="again">再来一局</button>
+  </div>`;
+}
+function bindOver() {
+  const b = document.getElementById("again");
+  if (b) b.onclick = () => { S = null; UI = { mode: null, ghost: null, villager: null, banner: null, draw: null, hint: "", personSel: null, logOpen: false }; render(); };
+}
+
+function autoplay(n) {
+  window.__noRender = true;
+  let win = 0, crash = 0, sealed = 0, alive = 0, nights = 0;
+  const winners = {};
+  for (let k = 0; k < n; k++) {
+    try {
+      S = null; UI = { mode: null, ghost: null, villager: null, banner: null, draw: null, hint: "", personSel: null, logOpen: false };
+      S = newState("稽查员"); S.items.饵 = 9; S.items.灯 = 9; S.items.契 = 3; startNight(S); drawOffer();
+      let guard = 0, stall = 0;
+      while (!S.ended && guard++ < 500) {
+        UI.banner = null;
+        if (UI.draw) { S.hand.push(UI.draw[0]); UI.draw = null; }
+        const mark = S.ap + ":" + S.logs.length + ":" + S.night;
+        const gs = S.gs.filter(g => isAwake(S, g) && !g.sealed && g.dazed === 0 && !g.isBrute);
+        if (S.ap > 0) {
+          const g = gs.find(g => g.bones > 1) || gs[0];
+          if (g && g.bones > 1) actInvestigate(g.id, BONES.find(b => !g.known[b]));
+          else if (g) actSeal(g.id);
+          else if (gs.length >= 2 && S.ap >= 2 && (gs[0].rank === gs[1].rank || S.items.契 > 0) && gs[0].known.law && gs[1].known.law) actCollide(gs[0].id, gs[1].id);
+          else if (aliveV(S).length > 4) {
+            const v = aliveV(S).find(v => v.tags.includes(g ? g.tag : "井水")) || aliveV(S)[0];
+            if (g && v) actFeed(g.id, v.id); else S.ap = 0;
+          } else S.ap = 0;
+        } else endNight();
+        if (!S.ended && S.ap + ":" + S.logs.length + ":" + S.night === mark) {
+          if (++stall > 3) { S.ap = 0; stall = 0; }
+        } else stall = 0;
+      }
+      const e = S.ending ? S.ending.e : "无";
+      winners[e] = (winners[e] || 0) + 1;
+      if (["送走", "结案", "勉强"].includes(e)) win++;
+      sealed += S.sealedCount; alive += aliveV(S).length; nights += S.night;
+    } catch (err) { crash++; if (crash === 1) console.error(err); }
+  }
+  window.__noRender = false;
+  return { n, win, rate: +(win / n * 100).toFixed(1), crash, avgSeal: +(sealed / n).toFixed(2), avgAlive: +(alive / n).toFixed(2), avgNight: +(nights / n).toFixed(2), endings: winners };
+}
+const params = new URLSearchParams(location.search);
+if (params.get("selftest")) {
+  const n = +params.get("n") || 300;
+  setTimeout(() => { window.__result = autoplay(n); }, 30);
+} else render();
+window.__api = { newState, autoplay, get S() { return S; } };
+</script>
+</body>
+</html>
